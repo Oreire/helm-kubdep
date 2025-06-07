@@ -22,6 +22,7 @@ spec:
       containers:
         - name: coweb
           image: coweb-app:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 80
           resources:

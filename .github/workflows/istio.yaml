@@ -16,7 +16,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
+      - name: Build Local Docker image
         run: |
           cd WEB
           docker build --no-cache -t coweb-app:latest .
