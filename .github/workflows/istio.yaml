@@ -22,7 +22,6 @@ jobs:
           docker build --no-cache -t coweb-app:latest .
 
 
-
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
