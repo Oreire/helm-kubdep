@@ -35,22 +35,13 @@ jobs:
         run: |
           kubectl rollout status deployment/coweb -n coweb-ns
 
-      - name: Port forward service to localhost:31999
+      - name: Wait for coweb-service and port forward
         run: |
-          kubectl port-forward service/coweb-service 31999:80 -n coweb-ns &
-
-      # - name: Set up ArgoCD CLI
-      #   uses: argoproj-labs/setup-argocd-cli@v1
-      #   with:
-      #     version: 'latest'
-
-      # - name: Sync ArgoCD application
-      #   run: |
-      #     argocd app sync coweb-app
-      #     argocd app wait coweb-app --health --sync
-      # - name: Notify deployment success
-      #   run: |
-      #     echo "Deployment to Kubernetes cluster successful!"
-      #     echo "Application is now live at http://<your-node-ip>:30080"
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          while ! kubectl get svc coweb-service -n coweb-ns --no-headers; do
+            echo "Waiting for coweb-service to be created..."
+            sleep 5
+          done
+          echo "Service is available, starting port forwarding..."
+          kubectl port-forward service/coweb-service 31888:80 -n coweb-ns &
+          sleep 10
+          echo "Port forwarding started. You can access the service at http://localhost:31888"
