@@ -1,0 +1,1 @@
+## <span class="image fill" data-position="center"><img src="images/logo_image.jpg" alt="Intro Image" /></span>
