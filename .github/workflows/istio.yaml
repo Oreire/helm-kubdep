@@ -18,7 +18,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t coweb-app:latest ./WEB
+          cd WEB
+          docker build -t coweb-app:latest .
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
