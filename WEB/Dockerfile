@@ -4,5 +4,7 @@ COPY ./WEB /usr/share/nginx/html
 COPY ./WEB/index.html /usr/share/nginx/html/index.html
 #COPY ./WEB/script.js /usr/share/nginx/html/script.js
 COPY ./WEB/images/ /usr/share/nginx/html/images
-COPY ./WEB/assets/ /usr/share/nginx/html/assets
+
+COPY assets/ /usr/share/nginx/html/assets
+
 EXPOSE 80
