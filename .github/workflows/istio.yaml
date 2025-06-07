@@ -31,11 +31,11 @@ jobs:
 
       - name: Wait for deployment to be ready
         run: |
-          kubectl rollout status deployment/coweb -n default
+          kubectl rollout status deployment/coweb -n coweb-ns
 
       - name: Port forward service to localhost:31999
         run: |
-          kubectl port-forward service/coweb-service 31999:80 -n default &
+          kubectl port-forward service/coweb-service 31999:80 -n coweb-ns &
 
       # - name: Set up ArgoCD CLI
       #   uses: argoproj-labs/setup-argocd-cli@v1

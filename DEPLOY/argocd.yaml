@@ -1,4 +1,4 @@
----apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: coweb
@@ -6,11 +6,11 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://your-repo-url.git'
+    repoURL: "https://your-repo-url.git"
     targetRevision: HEAD
     path: .
   destination:
-    server: 'https://kubernetes.default.svc'
+    server: "https://kubernetes.default.svc"
     namespace: coweb-ns
   syncPolicy:
     automated:
