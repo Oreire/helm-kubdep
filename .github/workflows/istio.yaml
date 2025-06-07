@@ -20,10 +20,8 @@ jobs:
         run: |
           cd WEB
           docker build --no-cache -t coweb-app:latest .
-
-      - name: Load image into Kubernetes (Docker Desktop)
-        run: |
-          kind load docker-image coweb-app:latest
+          docker tag coweb-app:latest localhost:5000/coweb-app:latest
+          docker push localhost:5000/coweb-app:latest
           
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
