@@ -22,7 +22,7 @@ container:
 # Kubernetes Service configurations
 service:
   name: coweb-service
-  type: ClusterIP  # Use LoadBalancer for external access
+  type: NodePort  # Use LoadBalancer for external access
   port: 80
   targetPort: 80
 
