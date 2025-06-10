@@ -23,6 +23,11 @@ jobs:
     #     run: |
     #       kind load docker-image coweb-app:latest
 
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
       - name: Set Kubernetes Context
         run: |
           kubectl config use-context docker-desktop
