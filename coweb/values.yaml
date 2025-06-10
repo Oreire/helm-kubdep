@@ -61,3 +61,7 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
+serviceAccount:
+  create: true  # Ensure this is explicitly set
+  name: ""  # Optional, override service account name
+
