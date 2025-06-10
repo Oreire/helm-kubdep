@@ -110,3 +110,5 @@ This creates a directory named coweb that contains default templates for deploym
 
 
 
+ingress.yaml
+

@@ -1,16 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.service.name }}  # Uses a separate service name from the deployment
+  name: {{ include "coweb.fullname" . }}
   labels:
     {{- include "coweb.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.container.port }}  # Uses container port from values.yaml
+      targetPort: http
       protocol: TCP
       name: http
   selector:
     {{- include "coweb.selectorLabels" . | nindent 4 }}
-
