@@ -1,0 +1,46 @@
+name: Helm Deployment (Local)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Local Docker image
+        run: |
+          cd WEB
+          docker build --no-cache -t coweb-app:latest .
+          docker tag coweb-app:latest localhost:5000/coweb-app:latest
+          docker push localhost:5000/coweb-app:latest
+
+    #   - name: Load image into Kubernetes (Docker Desktop)
+    #     run: |
+    #       kind load docker-image coweb-app:latest
+
+      - name: Set Kubernetes Context
+        run: |
+          kubectl config use-context docker-desktop
+
+      - name: Apply Kubernetes Manifests
+        run: |
+          kubectl apply -f DEPLOY/
+
+      - name: Install Helm and Deploy Application
+        run: |
+          helm upgrade --install coweb ./coweb --namespace coweb-ns --set image.repository=coweb --set image.tag=latest
+
+      - name: Force Deployment to Use Latest Image
+        run: |
+            kubectl rollout restart deployment/coweb -n coweb-ns
+
+      - name: Verify Deployment Status
+        run: |
+          kubectl get pods -n coweb-ns
+          kubectl get svc -n coweb-ns
+
