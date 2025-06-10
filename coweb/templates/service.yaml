@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "coweb.fullname" . }}
+  name: {{ include "coweb-service.fullname" . }}
   labels:
     {{- include "coweb.labels" . | nindent 4 }}
 spec:
