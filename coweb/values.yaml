@@ -53,6 +53,7 @@ securityContext: {}
 service:
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
   name: coweb-service
+  namespace: coweb-ns
   type: NodePort
   # This sets the service name more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#name
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
