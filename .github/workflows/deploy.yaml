@@ -1,10 +1,8 @@
 name: Helm Deployment (Local)
-
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: self-hosted
@@ -20,11 +18,9 @@ jobs:
           docker tag coweb-app:latest localhost:5000/coweb-app:latest
           docker push localhost:5000/coweb-app:latest
           cd ..
-
       - name: Ensure Namespace Exists
         run: |
           kubectl get ns coweb-ns || kubectl create ns coweb-ns
-
       - name: Set Kubernetes Context to Docker Desktop
         run: |
           kubectl config use-context docker-desktop
@@ -46,6 +42,6 @@ jobs:
           kubectl get all -n coweb-ns
 
       - name: Rollback on Failure
-        if: failure()
+        if: ${{ failure() }}
         run: |
-          helm rollback coweb
+          helm rollback coweb --namespace coweb-ns
