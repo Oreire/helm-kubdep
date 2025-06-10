@@ -7,7 +7,7 @@ image:
   pullPolicy: Always  # Ensures the latest image is always pulled
 
 # Kubernetes Deployment configurations
-replicaCount: 12  # Adjust this based on your scaling needs
+replicaCount: 6  # Adjust this based on your scaling needs
 
 container:
   port: 80  # Ensure this matches your app's exposed port
