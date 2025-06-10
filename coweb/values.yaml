@@ -41,3 +41,10 @@ ingress:
 serviceAccount:
   create: true  # Set to false if you don't need a service account
   name: coweb-sa  # Helm defaults to Release.Name if not specified
+
+autoscaling:
+  enabled: false  # Set to true if you want Horizontal Pod Autoscaler (HPA)
+  minReplicas: 1
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 80
+
