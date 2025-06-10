@@ -45,3 +45,7 @@ jobs:
         run: |
           kubectl get all -n coweb-ns
 
+      - name: Rollback on Failure
+        if: failure()
+        run: |
+          helm rollback coweb
