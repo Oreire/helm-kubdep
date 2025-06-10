@@ -1,5 +1,3 @@
-# helm-kubdep
-
 ## Deployment of Containerized Web Applications on a Kubernetes Cluster Using Helm and GitHub Actions
 
 
