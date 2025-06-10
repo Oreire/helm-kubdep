@@ -19,9 +19,9 @@ jobs:
           docker tag coweb-app:latest localhost:5000/coweb-app:latest
           docker push localhost:5000/coweb-app:latest
 
-    #   - name: Load image into Kubernetes (Docker Desktop)
-    #     run: |
-    #       kind load docker-image coweb-app:latest
+      - name: Ensure coweb-ns namespace exists
+        run: |
+          kubectl get namespace coweb-ns || kubectl create namespace coweb-ns
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
@@ -36,16 +36,23 @@ jobs:
         run: |
           kubectl apply -f DEPLOY/
 
+      - name: Lint Helm Chart
+        run: |
+          helm lint ./coweb
+
       - name: Install Helm and Deploy Application
         run: |
-          helm upgrade --install coweb ./coweb --namespace coweb-ns --set image.repository=coweb --set image.tag=latest
+          helm upgrade --install coweb ./coweb \
+            --namespace coweb-ns \
+            --set image.repository=coweb \
+            --set image.tag=latest \
+            --set image.pullPolicy=Always
 
       - name: Force Deployment to Use Latest Image
         run: |
-            kubectl rollout restart deployment/coweb -n coweb-ns
+          kubectl rollout restart deployment/coweb -n coweb-ns
 
       - name: Verify Deployment Status
         run: |
-          kubectl get pods -n coweb-ns
-          kubectl get svc -n coweb-ns
+          kubectl get all -n coweb-ns
 
