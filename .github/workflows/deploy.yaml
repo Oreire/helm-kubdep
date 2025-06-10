@@ -45,4 +45,7 @@ jobs:
       - name: Rollback on Failure
         if: ${{ failure() }}
         run: |
-          helm rollback coweb --namespace coweb-ns
+          kubectl rollout undo deployment/coweb -n coweb-ns
+          helm rollback coweb-service --namespace coweb-ns
+
+

@@ -15,7 +15,7 @@ service:
   port: 80
   targetPort: 80
   protocol: TCP
-  nodePort: 31444  # NodePort must be within 30000-32767 range
+  nodePort: 31500  # NodePort must be within 30000-32767 range
 
 # Ingress Configuration (Disabled by Default)
 ingress:
