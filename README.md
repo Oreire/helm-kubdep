@@ -100,15 +100,51 @@ This creates a directory named coweb that contains default templates for deploym
     
     -	Use port-forwarding to access the application: 
     
-        kubectl port-forward svc/coweb-service 31999:80 -n coweb-ns
+        kubectl port-forward svc/coweb-service 32500:80 -n coweb-ns
     
     -	Open the application in a browser: 
         
-        http://localhost:31999
+        http://localhost:32500
+
+## 5.0 Key Project Highlights
+
+## Helm Linting Workflow
+
+The helm lint ./coweb command validates the Helm chart in the coweb directory, checking Chart.yaml, values.yaml, and templates for syntax errors, missing values, and adherence to best practices. Helm processes templates to ensure correct references to defined values. If misconfigurations such as undefined .Values references, incorrect field types, or structural issues are detected, it generates warnings or errors that may lead to deployment failures. Linting helps maintain Helm charts by ensuring consistency across environments and preventing runtime errors. As a key step in CI/CD pipelines, it catches issues before deployment, reducing risks and improving reliability.
+
+## CodeRabbit
+
+CodeRabbit is an AI-powered code review tool that integrates with GitHub to automate pull request reviews. Installed in VS Code and triggered on push, it analyzes code changes, summarizes identified issues, and suggests improvements using AI models. It can also be integrated into CI/CD pipelines by authorizing CodeRabbit on GitHub, configuring it for the repository, and enabling it in GitHub Actions. This provides several benefits, including reducing manual code reviews, AI-powered issue detection, continuous feedback on commits within pull requests, and customizable rules via .coderabbit.yaml.
+
+## Helm Rollbacks & Kubernetes Health Checks
+
+Helm rollbacks ensure application stability by reverting deployments to previous functional versions in case of failures. Users can restore an earlier release by specifying the release name and revision. Tracking rollback history improves transparency, helping teams understand deployment evolution.
+
+Kubernetes health checks enhance application reliability through liveness and readiness probes. Liveness probes restart unhealthy containers, while readiness probes prevent unready instances from receiving traffic. Configuring these probes in deployment.yaml improves uptime and mitigates cascading failures.
+
+Integrating Helm rollbacks with Kubernetes health checks strengthens deployment resilience, minimizing downtime and enhancing fault tolerance. Automating rollback triggers based on failed health checks ensures rapid recovery. Teams can further optimize workflows by incorporating Kubernetes StatefulSets for consistent recovery strategies.
+
+## CI/CD Integration with Helm
+
+Integrating Helm chart deployment with CI/CD automation using GitHub Actions streamlines updates. Changes pushed to a repository trigger automatic Helm deployments while validating configurations through linting to catch errors early. In case of deployment failures, Helm’s rollback mechanism restores the previous stable version, preventing disruptions. Additionally, Helm's upgrade strategy enables zero-downtime updates, maintaining application availability.
+
+
+**Overall**, by combining Helm rollbacks, Kubernetes health checks, CI/CD automation, and AI-powered code reviews, deployments become more resilient and self-healing. This reduces manual intervention while ensuring fast recovery from failures, making it ideal for production environments where uptime and stability are critical. 
+
+## 6.0	Next-Steps
+
+To optimize this CI/CD workflow for production environments, consider the following enhancements:
+   
+    -	Enhanced Security and Secrets Management via Role-Based Access Control (RBAC) to ensure secure Helm deployments.
+   
+    -	GitOps integration for further enhanced deployment reliability using ArgoCD
+   
+    -	Automated Unit, Integration and Smoke Testing before deployment to validate the containerized application.
+   
+    -	Improved Observability using Istio
 
 
 
 
 
-ingress.yaml
 
