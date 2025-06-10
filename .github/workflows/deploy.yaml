@@ -36,10 +36,6 @@ jobs:
         run: |
           kubectl apply -f DEPLOY/
 
-      - name: Lint Helm Chart
-        run: |
-          helm lint ./coweb
-
       - name: Install Helm and Deploy Application
         run: |
           helm upgrade --install coweb ./coweb \
@@ -47,6 +43,10 @@ jobs:
             --set image.repository=coweb \
             --set image.tag=latest \
             --set image.pullPolicy=Always
+    
+      - name: Lint Helm Chart
+        run: |
+          helm lint ./coweb
 
       - name: Force Deployment to Use Latest Image
         run: |
