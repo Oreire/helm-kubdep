@@ -52,11 +52,16 @@ securityContext: {}
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  type: nodePort
-  # This sets the service name more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#name
   name: coweb-service
+  type: NodePort
+  # This sets the service name more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#name
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 80
+  targetPort: 80  # Ensure this matches the container port
+  protocol: TCP
+  # This sets the NodePort more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
+  nodePort: 31444  # Optional, specify a valid NodePort within the range (30000-32767)
+
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
