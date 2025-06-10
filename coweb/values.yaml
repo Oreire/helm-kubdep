@@ -26,14 +26,14 @@ service:
 namespace: coweb-ns
 
 # Ingress (optional - enable if using ingress controller)
-ingress:
-  enabled: false
-  annotations: {}
-  hosts:
-    - host: coweb.local
-      paths:
-        - path: /
-          pathType: Prefix
+# ingress:
+#   enabled: false
+#   annotations: {}
+#   hosts:
+#     - host: coweb.local
+#       paths:
+#         - path: /
+#           pathType: Prefix
 
 serviceAccount:
   create: true  # Set to false if you don't need a service account
@@ -59,4 +59,16 @@ readinessProbe:
   initialDelaySeconds: 3
   periodSeconds: 5
 
+
+ingress:
+  enabled: true
+  hosts:
+    - host: local-app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: coweb-service
+              port: 80
 
