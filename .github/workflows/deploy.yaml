@@ -72,6 +72,12 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe" -OutFile "$env:USERPROFILE\argocd.exe"
           $env:Path += ";$env:USERPROFILE"
 
+      - name: Port Forward ArgoCD Server (Windows-safe)
+        shell: pwsh
+        run: |
+         Start-Process -NoNewWindow -FilePath "kubectl" -ArgumentList "port-forward svc/argocd-server -n argocd 8080:8080"
+
+
       - name: Login to ArgoCD
         shell: pwsh
         run: |
