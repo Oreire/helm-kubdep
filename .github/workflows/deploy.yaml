@@ -66,6 +66,12 @@ jobs:
          set -e
          kubectl rollout undo deployment/coweb -n coweb-ns
 
+      - name: Install ArgoCD CLI (Windows)
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe" -OutFile "$env:USERPROFILE\argocd.exe"
+          $env:Path += ";$env:USERPROFILE"
+
       - name: Authenticate with ArgoCD (Local Instance)
         run: |
           argocd login localhost:8080 --username admin --password $ARGOCD_PASSWORD --grpc-web
