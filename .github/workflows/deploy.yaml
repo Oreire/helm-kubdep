@@ -48,14 +48,19 @@ jobs:
           kubectl get all -n coweb-ns
           kubectl get svc -n coweb-ns
 
-      - name: Rollback on Failure (Enhanced)
+      # - name: Rollback on Failure (Enhanced)
+      #   if: ${{ failure() }}
+      #   run: |
+      #     kubectl rollout undo deployment/coweb -n coweb-ns
+      #     LAST_REVISION=$(helm history coweb --namespace coweb-ns --max 1 | awk '{print $1}' | tail -n 1)
+      #     if [ "$LAST_REVISION" != "REVISION" ]; then
+      #       helm rollback coweb --namespace coweb-ns
+      #     fi
+      - name: Rollback on Failure
         if: ${{ failure() }}
         run: |
-          kubectl rollout undo deployment/coweb -n coweb-ns
-          LAST_REVISION=$(helm history coweb --namespace coweb-ns --max 1 | awk '{print $1}' | tail -n 1)
-          if [ "$LAST_REVISION" != "REVISION" ]; then
-            helm rollback coweb --namespace coweb-ns
-          fi
+         set -e
+         kubectl rollout undo deployment/coweb -n coweb-ns
 
       - name: Authenticate with ArgoCD
         run: |
