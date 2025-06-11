@@ -65,3 +65,23 @@ serviceAccount:
   create: true  # Ensure this is explicitly set
   name: ""  # Optional, override service account name
 
+# ArgoCD Application Configuration
+argoApp:
+  name: coweb-app
+  namespace: argocd
+  project: coweb-ns
+  repoURL: https://github.com/Oreire/helm-kubdep.git
+  targetRevision: main
+  path: coweb/ # helm-chart-directory
+  helm:
+    valueFiles:
+      - values.yaml
+  destinationServer: https://kubernetes.default.svc
+  destinationNamespace: coweb-ns
+syncPolicy:
+  prune: true
+  selfHeal: true
+  ignoreDifferences: true  # Optional, to ignore differences in certain fields
+  syncOptions:
+    - CreateNamespace=true
+    

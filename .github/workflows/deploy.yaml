@@ -3,13 +3,17 @@ on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: self-hosted
-
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
+
+      - name: Ensure Local Registry is Running
+        run: |
+          docker ps | grep "registry" || docker run -d -p 5000:5000 --restart=always --name registry registry:2
 
       - name: Build and Push Local Docker Image
         run: |
@@ -18,9 +22,11 @@ jobs:
           docker tag coweb-app:latest localhost:5000/coweb-app:latest
           docker push localhost:5000/coweb-app:latest
           cd ..
+
       - name: Ensure Namespace Exists
         run: |
           kubectl get ns coweb-ns || kubectl create ns coweb-ns
+
       - name: Set Kubernetes Context to Docker Desktop
         run: |
           kubectl config use-context docker-desktop
@@ -29,9 +35,9 @@ jobs:
         run: |
           helm lint ./coweb
 
-      - name: Deploy with Helm
+      - name: Deploy with Helm (Stable Setup)
         run: |
-          helm upgrade --install coweb ./coweb --namespace coweb-ns --set image.repository=localhost:5000/coweb-app --set image.tag=latest --set image.pullPolicy=Always
+          helm upgrade --install coweb ./coweb --namespace coweb-ns --set image.repository=localhost:5000/coweb-app --set image.tag=latest --set image.pullPolicy=Always --wait
 
       - name: Restart Deployment to Apply Latest Image
         run: |
@@ -42,10 +48,34 @@ jobs:
           kubectl get all -n coweb-ns
           kubectl get svc -n coweb-ns
 
-      - name: Rollback on Failure
+      - name: Rollback on Failure (Enhanced)
         if: ${{ failure() }}
         run: |
           kubectl rollout undo deployment/coweb -n coweb-ns
-          helm rollback coweb-service --namespace coweb-ns
+          LAST_REVISION=$(helm history coweb --namespace coweb-ns --max 1 | awk '{print $1}' | tail -n 1)
+          if [ "$LAST_REVISION" != "REVISION" ]; then
+            helm rollback coweb --namespace coweb-ns
+          fi
 
+      - name: Authenticate with ArgoCD
+        run: |
+          argocd login localhost:8080 --username admin --password $ARGOCD_PASSWORD --grpc-web
+        env:
+          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD || 'default_password' }}
 
+      - name: Deploy and Monitor Application with ArgoCD
+        run: |
+          set -e
+          argocd app sync coweb-app --grpc-web || { echo "Sync failed"; exit 1; }
+          argocd app wait coweb-app --health --timeout 300 || { echo "App is not healthy"; exit 1; }
+
+      - name: Wait for coweb-service and Port Forward
+        run: |
+          while ( -not (kubectl get svc coweb-service -n coweb-ns --no-headers)) {
+            Write-Host "Waiting for coweb-service to be created..."
+            Start-Sleep 5
+          }
+          Write-Host "Service is available, starting port forwarding..."
+          kubectl port-forward service/coweb-service 32000:80 -n coweb-ns &
+          Start-Sleep 10
+          Write-Host "Port forwarding started. You can access the service at http://localhost:32000"

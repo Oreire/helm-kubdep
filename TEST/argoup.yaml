@@ -1,0 +1,71 @@
+name: Helm Deployment (Local)
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build and Push Local Docker Image
+        run: |
+          cd WEB
+          docker build --no-cache -t coweb-app:latest .
+          docker tag coweb-app:latest localhost:5000/coweb-app:latest
+          docker push localhost:5000/coweb-app:latest
+          cd ..
+      - name: Ensure Namespace Exists
+        run: |
+          kubectl get ns coweb-ns || kubectl create ns coweb-ns
+      - name: Set Kubernetes Context to Docker Desktop
+        run: |
+          kubectl config use-context docker-desktop
+
+      - name: Lint Helm Chart
+        run: |
+          helm lint ./coweb
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install coweb ./coweb --namespace coweb-ns --set image.repository=localhost:5000/coweb-app --set image.tag=latest --set image.pullPolicy=Always
+
+      - name: Restart Deployment to Apply Latest Image
+        run: |
+          kubectl rollout restart deployment/coweb -n coweb-ns
+
+      - name: Verify Deployment
+        run: |
+          kubectl get all -n coweb-ns
+          kubectl get svc -n coweb-ns
+
+      - name: Rollback on Failure
+        if: ${{ failure() }}
+        run: |
+          kubectl rollout undo deployment/coweb -n coweb-ns
+          helm rollback coweb-service --namespace coweb-ns
+
+
+      # - name: Sync Application with ArgoCD
+      #   run: |
+      #         argocd app sync coweb-app --grpc-web
+
+      # - name: Wait for ArgoCD Application to be Healthy
+      #   run: |
+      #         argocd app wait coweb-app --health --timeout 300
+    # - name: Authenticate with ArgoCD
+    #   run: |
+    #     argocd login $ARGOCD_SERVER --username $ARGOCD_USERNAME --password $ARGOCD_PASSWORD --grpc-web
+    #   env:
+    #     ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+    #     ARGOCD_USERNAME: ${{ secrets.ARGOCD_USERNAME }}
+    #     ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
+
+    # - name: Deploy and Monitor Application
+    #   run: |
+    #     set -e
+    #     argocd app sync coweb-app --grpc-web || { echo "Sync failed"; exit 1; }
+    #     argocd app wait coweb-app --health --timeout 300 || { echo "App is not healthy"; exit 1; }

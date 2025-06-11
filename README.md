@@ -75,12 +75,12 @@ This creates a directory named coweb that contains default templates for deploym
     
     -   Run the following command to install the Helm chart:
         
-        helm install my-web-app ./my-web-app --namespace my-app
+        helm install coweb ./coweb --namespace my-app
     
     -   Verify that the deployment and service are running:
         
         kubectl get pods -n coweb-ns
-        kubectl get svc -n cpweb-ns
+        kubectl get svc -n coweb-ns
 
 ## Step 7: Automate CI/CD with GitHub Actions
 
