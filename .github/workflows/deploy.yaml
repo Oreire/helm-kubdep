@@ -61,7 +61,7 @@ jobs:
         run: |
           argocd login localhost:8080 --username admin --password $ARGOCD_PASSWORD --grpc-web
         env:
-          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD || 'default_password' }}
+          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
 
       - name: Deploy and Monitor Application with ArgoCD
         run: |
@@ -69,13 +69,11 @@ jobs:
           argocd app sync coweb-app --grpc-web || { echo "Sync failed"; exit 1; }
           argocd app wait coweb-app --health --timeout 300 || { echo "App is not healthy"; exit 1; }
 
-      - name: Wait for coweb-service and Port Forward
+      - name: Wait for Service and Port Forward
+        shell: bash
         run: |
-          while ( -not (kubectl get svc coweb-service -n coweb-ns --no-headers)) {
-            Write-Host "Waiting for coweb-service to be created..."
-            Start-Sleep 5
-          }
-          Write-Host "Service is available, starting port forwarding..."
-          kubectl port-forward service/coweb-service 32000:80 -n coweb-ns &
-          Start-Sleep 10
-          Write-Host "Port forwarding started. You can access the service at http://localhost:32000"
+          until kubectl get svc coweb-service -n coweb-ns; do
+            echo "Waiting for service..."
+            sleep 5
+          done
+          kubectl port-forward svc/coweb-service 32000:80 -n coweb-ns &

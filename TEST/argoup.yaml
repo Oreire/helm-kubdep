@@ -43,10 +43,20 @@ jobs:
           kubectl get svc -n coweb-ns
 
       - name: Rollback on Failure
-        if: ${{ failure() }}
-        run: |
-          kubectl rollout undo deployment/coweb -n coweb-ns
-          helm rollback coweb-service --namespace coweb-ns
+  if: ${{ failure() }}
+  run: |
+    set -e
+    kubectl rollout undo deployment/coweb -n coweb-ns
+    
+    # Get the latest revision dynamically
+    LAST_REVISION=$(helm history coweb --namespace coweb-ns --max 1 | awk 'NR>1 {print $1}' | tail -n 1)
+
+    if [ -n "$LAST_REVISION" ]; then
+      helm rollback coweb "$LAST_REVISION" --namespace coweb-ns
+    else
+      echo "No previous revision found, skipping rollback"
+    fi
+
 
 
       # - name: Sync Application with ArgoCD
