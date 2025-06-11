@@ -72,17 +72,12 @@ jobs:
           Invoke-WebRequest -Uri "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe" -OutFile "$env:USERPROFILE\argocd.exe"
           $env:Path += ";$env:USERPROFILE"
 
-      - name: Authenticate with ArgoCD (Local Instance)
+      - name: Login to ArgoCD
+        shell: pwsh
         run: |
-          argocd login localhost:8080 --username admin --password $ARGOCD_PASSWORD --grpc-web
+         & "$env:USERPROFILE\argocd.exe" login localhost:8080 --username admin --password $env:ARGOCD_PASSWORD --grpc-web
         env:
-           ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
-
-      # - name: Deploy and Sync Application
-      #   run: |
-      #     argocd app sync coweb-app --grpc-web || { echo "Sync failed"; exit 1; }
-      #     argocd app wait coweb-app --health --timeout 300 || { echo "App is not healthy"; exit 1; }
-
+          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
 
       - name: Deploy with ArgoCD (Bash)
         shell: bash
