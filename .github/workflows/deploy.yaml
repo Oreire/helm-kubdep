@@ -66,26 +66,17 @@ jobs:
          set -e
          kubectl rollout undo deployment/coweb -n coweb-ns
 
-      - name: Install ArgoCD CLI
-        shell: bash
-        run: |
-          # curl -sSL -o argocd -L https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          curl --connect-timeout 10 -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x argocd
-          sudo mv argocd /usr/local/bin/argocd
-
-      - name: Authenticate with ArgoCD
+      - name: Authenticate with ArgoCD (Local Instance)
         run: |
           argocd login localhost:8080 --username admin --password $ARGOCD_PASSWORD --grpc-web
         env:
-          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
+           ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
 
-      # - name: Deploy and Monitor Application with ArgoCD
-      #   shell: bash
+      # - name: Deploy and Sync Application
       #   run: |
-      #     set -e
       #     argocd app sync coweb-app --grpc-web || { echo "Sync failed"; exit 1; }
       #     argocd app wait coweb-app --health --timeout 300 || { echo "App is not healthy"; exit 1; }
+
 
       - name: Deploy with ArgoCD (Bash)
         shell: bash
