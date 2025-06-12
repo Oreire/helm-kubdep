@@ -80,7 +80,7 @@ jobs:
       - name: Login to ArgoCD
         shell: pwsh
         run: |
-         & "$env:USERPROFILE\argocd.exe" login localhost:8080 --username admin --password $env:ARGOCD_PASSWORD --grpc-web
+         & "$env:USERPROFILE\argocd.exe" login localhost:8080 --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
         env:
           ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
 
