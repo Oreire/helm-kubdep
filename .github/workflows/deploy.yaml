@@ -41,7 +41,13 @@ jobs:
 
       - name: Deploy with Helm (Stable Setup)
         run: |
-          helm upgrade --install coweb ./coweb --namespace coweb-ns --set image.repository=localhost:5000/coweb-app --set image.tag=latest --set image.pullPolicy=Always --wait
+          # helm upgrade --install coweb ./coweb --namespace coweb-ns --set image.repository=localhost:5000/coweb-app --set image.tag=latest --set image.pullPolicy=Always --wait
+          helm upgrade --install coweb ./coweb --namespace coweb-ns \
+            --set image.repository="localhost:5000/coweb-app" \
+            --set image.tag="latest" \
+            --set image.pullPolicy="Always" \
+            --wait
+
 
       - name: Restart Deployment to Apply Latest Image
         run: |
@@ -52,14 +58,7 @@ jobs:
           kubectl get all -n coweb-ns
           kubectl get svc -n coweb-ns
 
-      # - name: Rollback on Failure (Enhanced)
-      #   if: ${{ failure() }}
-      #   run: |
-      #     kubectl rollout undo deployment/coweb -n coweb-ns
-      #     LAST_REVISION=$(helm history coweb --namespace coweb-ns --max 1 | awk '{print $1}' | tail -n 1)
-      #     if [ "$LAST_REVISION" != "REVISION" ]; then
-      #       helm rollback coweb --namespace coweb-ns
-      #     fi
+      
       - name: Rollback on Failure
         if: ${{ failure() }}
         run: |
