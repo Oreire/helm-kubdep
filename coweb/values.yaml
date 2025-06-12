@@ -73,15 +73,26 @@ project: coweb-ns
 repoURL: https://github.com/Oreire/helm-kubdep.git
 targetRevision: main
 path: coweb/
+destinationServer: https://kubernetes.default.svc
+destinationNamespace: coweb-ns
+
+# Helm-specific Configuration
 helm:
   valueFiles:
     - values.yaml
-destinationServer: https://kubernetes.default.svc
-destinationNamespace: coweb-ns
+  parameters:
+    argoServer:
+      service:
+        port: 80
+        host: argocd-server
+
+# ArgoCD Sync Policy
 syncPolicy:
   prune: true
   selfHeal: true
   ignoreDifferences: true
   syncOptions:
     - CreateNamespace=true
+    - ApplyOutOfSyncOnly=true
+    - Replace=true
 

@@ -14,15 +14,20 @@ spec:
         {{- range .Values.valueFiles }}
         - {{ . }}
         {{- end }}
+      parameters:
+        - name: argoServer.service.port
+          value: {{ .Values.argoServer.service.port | default "443" }}
+        - name: argoServer.service.host
+          value: {{ .Values.argoServer.service.host | default "argocd-server" }}
   destination:
     server: {{ .Values.destinationServer | default "https://kubernetes.default.svc" }}
-    namespace: {{ .Values.destinationNamespace }}
+    namespace: {{ .Values.destinationNamespace | default "coweb-ns" }}
   syncPolicy:
     automated:
       prune: {{ .Values.syncPolicy.prune | default true }}
-      selfHeal: {{ .Values.syncPolicy.selfHeal | default true }} 
+      selfHeal: {{ .Values.syncPolicy.selfHeal | default true }}
     syncOptions:
       - CreateNamespace=true
-
-
+      - ApplyOutOfSyncOnly=true
+      - Replace=true
 
