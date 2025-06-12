@@ -81,10 +81,10 @@ helm:
   valueFiles:
     - values.yaml
   parameters:
-    argoServer:
-      service:
-        port: 80
-        host: argocd-server
+    image:
+      repository: "localhost:5000/coweb-app"
+      tag: "latest"
+      pullPolicy: "Always"
 
 # ArgoCD Sync Policy
 syncPolicy:
@@ -95,9 +95,4 @@ syncPolicy:
     - CreateNamespace=true
     - ApplyOutOfSyncOnly=true
     - Replace=true
-
-argoServer:
-  service:
-    port: 80  # Ensure this key-value pair is present
-    host: argocd-server
 
