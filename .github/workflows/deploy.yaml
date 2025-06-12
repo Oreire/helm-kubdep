@@ -42,12 +42,11 @@ jobs:
       - name: Deploy with Helm (Stable Setup)
         run: |
           # helm upgrade --install coweb ./coweb --namespace coweb-ns --set image.repository=localhost:5000/coweb-app --set image.tag=latest --set image.pullPolicy=Always --wait
-          helm upgrade --install coweb ./coweb --namespace coweb-ns \
-            --set image.repository="localhost:5000/coweb-app" \
-            --set image.tag="latest" \
-            --set image.pullPolicy="Always" \
+          helm upgrade --install coweb ./coweb --namespace coweb-ns `
+            --set image.repository="localhost:5000/coweb-app" `
+            --set image.tag="latest" `
+            --set image.pullPolicy="Always" `
             --wait
-
 
       - name: Restart Deployment to Apply Latest Image
         run: |
