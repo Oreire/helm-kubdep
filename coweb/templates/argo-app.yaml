@@ -16,7 +16,7 @@ spec:
         {{- end }}
       parameters:
         - name: argoServer.service.port
-          value: {{ .Values.argoServer.service.port | default "443" }}
+          value: {{ .Values.argoServer.service.port | default "80" }}
         - name: argoServer.service.host
           value: {{ .Values.argoServer.service.host | default "argocd-server" }}
   destination:

@@ -96,3 +96,8 @@ syncPolicy:
     - ApplyOutOfSyncOnly=true
     - Replace=true
 
+argoServer:
+  service:
+    port: 80  # Ensure this key-value pair is present
+    host: argocd-server
+
