@@ -124,7 +124,7 @@ Kubernetes health checks enhance application reliability through liveness and re
 
 Integrating Helm rollbacks with Kubernetes health checks strengthens deployment resilience, minimizing downtime and enhancing fault tolerance. Automating rollback triggers based on failed health checks ensures rapid recovery. Teams can further optimize workflows by incorporating Kubernetes StatefulSets for consistent recovery strategies.
 
-## CI/CD Integration with Helm
+## CI/CD Integration with Helm As Manager
 
 Integrating Helm chart deployment with CI/CD automation using GitHub Actions streamlines updates. Changes pushed to a repository trigger automatic Helm deployments while validating configurations through linting to catch errors early. In case of deployment failures, Helm’s rollback mechanism restores the previous stable version, preventing disruptions. Additionally, Helm's upgrade strategy enables zero-downtime updates, maintaining application availability.
 
