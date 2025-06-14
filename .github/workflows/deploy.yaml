@@ -10,13 +10,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      
+
       - name: Ensure Local Docker Registry Is Running (Windows)
         shell: pwsh
         run: |
-         $registryExists = docker ps | Select-String "registry"
+          $registryExists = docker ps --format "{{.Names}}" | Select-String "registry"
           if (-not $registryExists) {
-          docker run -d -p 5000:5000 --restart=always --name registry registry:2
+            docker run -d -p 5000:5000 --restart=always --name registry registry:2
           }
 
       - name: Build and Push Local Docker Image
@@ -57,34 +57,40 @@ jobs:
           kubectl get all -n coweb-ns
           kubectl get svc -n coweb-ns
 
-      
       - name: Rollback on Failure
         if: ${{ failure() }}
         run: |
-         set -e
-         kubectl rollout undo deployment/coweb -n coweb-ns
+          kubectl rollout undo deployment/coweb -n coweb-ns
 
-      # - name: Install ArgoCD CLI (Windows)
-      #   shell: pwsh
-      #   run: |
-      #     Invoke-WebRequest -Uri "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe" -OutFile "$env:USERPROFILE\argocd.exe"
-      #     $env:Path += ";$env:USERPROFILE"
+      # Removed: ArgoCD CLI installation, assuming it's pre-installed
 
       - name: Install ArgoCD in the local k8s cluster
         run: |
           kubectl apply -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
 
+      - name: Wait for ArgoCD to be Available
+        run: |
+          kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
+
       - name: Port Forward ArgoCD Server (Windows-safe)
         shell: pwsh
         run: |
-         Start-Process -NoNewWindow -FilePath "kubectl" -ArgumentList "port-forward svc/argocd-server -n argocd 8080:8080"
+          Start-Process -NoNewWindow -FilePath "kubectl" -ArgumentList "port-forward svc/argocd-server -n argocd 8080:443"
+
+      - name: Validate ArgoCD CLI Execution
+        shell: pwsh
+        run: |
+          if (!(Test-Path "$env:USERPROFILE\argocd.exe")) {
+            Write-Error "ArgoCD CLI not found!"
+            exit 1
+          }
 
       - name: Login to ArgoCD
         shell: pwsh
         run: |
-         & "$env:USERPROFILE\argocd.exe" login localhost:8080 --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
+          & "$env:USERPROFILE\argocd.exe" login localhost:8080 --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
         env:
-          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }} # Ensure this secret is set in your repository settings
+          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
 
       - name: Deploy with ArgoCD (Bash)
         shell: bash
@@ -101,3 +107,14 @@ jobs:
             sleep 5
           done
           kubectl port-forward svc/coweb-service 32000:80 -n coweb-ns &
+
+      - name: Verify Service
+        shell: bash
+        run: |
+          sleep 10
+          if ! curl -s http://localhost:32000; then
+            echo "Service is not reachable!"
+            exit 1
+          else
+            echo "Service is reachable!"
+          fi

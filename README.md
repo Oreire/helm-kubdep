@@ -148,3 +148,106 @@ To optimize this CI/CD workflow for production environments, consider the follow
 
 
 xxx
+name: Helm Deployment (Local)
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Ensure Local Docker Registry Is Running (Windows)
+        shell: pwsh
+        run: |
+         $registryExists = docker ps | Select-String "registry"
+          if (-not $registryExists) {
+          docker run -d -p 5000:5000 --restart=always --name registry registry:2
+          }
+
+      - name: Build and Push Local Docker Image
+        run: |
+          cd WEB
+          docker build --no-cache -t coweb-app:latest .
+          docker tag coweb-app:latest localhost:5000/coweb-app:latest
+          docker push localhost:5000/coweb-app:latest
+          cd ..
+
+      - name: Ensure Namespace Exists
+        run: |
+          kubectl get ns coweb-ns || kubectl create ns coweb-ns
+
+      - name: Set Kubernetes Context to Docker Desktop
+        run: |
+          kubectl config use-context docker-desktop
+
+      - name: Lint Helm Chart
+        run: |
+          helm lint ./coweb
+
+      - name: Deploy with Helm (Stable Setup)
+        run: |
+          # helm upgrade --install coweb ./coweb --namespace coweb-ns --set image.repository=localhost:5000/coweb-app --set image.tag=latest --set image.pullPolicy=Always --wait
+          helm upgrade --install coweb ./coweb --namespace coweb-ns `
+            --set image.repository="localhost:5000/coweb-app" `
+            --set image.tag="latest" `
+            --set image.pullPolicy="Always" `
+            --wait
+
+      - name: Restart Deployment to Apply Latest Image
+        run: |
+          kubectl rollout restart deployment/coweb -n coweb-ns
+
+      - name: Verify Deployment
+        run: |
+          kubectl get all -n coweb-ns
+          kubectl get svc -n coweb-ns
+
+      
+      - name: Rollback on Failure
+        if: ${{ failure() }}
+        run: |
+         set -e
+         kubectl rollout undo deployment/coweb -n coweb-ns
+
+      # - name: Install ArgoCD CLI (Windows)
+      #   shell: pwsh
+      #   run: |
+      #     Invoke-WebRequest -Uri "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe" -OutFile "$env:USERPROFILE\argocd.exe"
+      #     $env:Path += ";$env:USERPROFILE"
+
+      - name: Install ArgoCD in the local k8s cluster
+        run: |
+          kubectl apply -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
+
+      - name: Port Forward ArgoCD Server (Windows-safe)
+        shell: pwsh
+        run: |
+         Start-Process -NoNewWindow -FilePath "kubectl" -ArgumentList "port-forward svc/argocd-server -n argocd 8080:80"
+
+      - name: Login to ArgoCD
+        shell: pwsh
+        run: |
+         & "$env:USERPROFILE\argocd.exe" login localhost:8080 --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
+        env:
+          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }} # Ensure this secret is set in your repository settings
+
+      - name: Deploy with ArgoCD (Bash)
+        shell: bash
+        run: |
+          set -e
+          argocd app sync coweb-app --grpc-web
+          argocd app wait coweb-app --health --timeout 300
+
+      - name: Wait for Service and Port Forward
+        shell: bash
+        run: |
+          until kubectl get svc coweb-service -n coweb-ns; do
+            echo "Waiting for service..."
+            sleep 5
+          done
+          kubectl port-forward svc/coweb-service 32000:80 -n coweb-ns &
