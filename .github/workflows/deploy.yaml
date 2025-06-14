@@ -63,20 +63,13 @@ jobs:
           kubectl port-forward svc/coweb-service -n coweb-ns 32500:80 &
           echo "Service is now available at http://localhost:32500"
 
-      - name: Wait for Service (PowerShell)
+      - name: Port-forward coweb-service
         shell: pwsh
         run: |
-          $serviceReady = $false
-          while (-not $serviceReady) {
-           $resp = Invoke-WebRequest -Uri "http://localhost:32500" -UseBasicParsing -ErrorAction SilentlyContinue
-           if ($resp) {
-           $serviceReady = $true
-           Write-Host "Service is ready!"
-          } else {
-          Write-Host "Waiting for service..."
-          Start-Sleep -Seconds 10
-          }
-           }
+          Start-Process -FilePath "kubectl" `
+            -ArgumentList "port-forward svc/coweb-service -n coweb-ns 32500:80" `
+            -WindowStyle Hidden
+          Start-Sleep -Seconds 5  # Allow port-forward to spin up
 
       - name: Rollback on Failure
         if: ${{ failure() }}
