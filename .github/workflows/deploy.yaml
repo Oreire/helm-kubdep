@@ -58,7 +58,7 @@ jobs:
           kubectl get svc -n coweb-ns
 
       - name: Port-forward and Verify Service
-        shell: bash
+        shell: pwsh
         run: |
           kubectl wait --for=condition=available --timeout=150s deployment/coweb -n coweb-ns
 
