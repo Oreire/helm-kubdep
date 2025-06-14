@@ -92,12 +92,12 @@ jobs:
       #   env:
       #     ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
 
-      - name: Deploy with ArgoCD (Bash)
-        shell: bash
-        run: |
-          set -e
-          argocd app sync coweb-app --grpc-web
-          argocd app wait coweb-app --health --timeout 300
+      # - name: Deploy with ArgoCD (Bash)
+      #   shell: bash
+      #   run: |
+      #     set -e
+      #     argocd app sync coweb-app --grpc-web
+      #     argocd app wait coweb-app --health --timeout 300
 
       - name: Wait for Service and Port Forward
         shell: bash
