@@ -63,17 +63,20 @@ jobs:
           kubectl port-forward svc/coweb-service 32000:80 -n coweb-ns &
           echo "Service is now available at http://localhost:32000"
 
-      - name: Verify Service
+      - name: Wait for Service (PowerShell)
         shell: pwsh
-        id: verify_service
         run: |
-          sleep 10
-          if ! curl -s http://localhost:32000; then
-            echo "Service is not reachable!"
-            exit 1
-          else
-            echo "Service is reachable!"
-          fi
+          $serviceReady = $false
+          while (-not $serviceReady) {
+           $resp = Invoke-WebRequest -Uri "http://localhost:32000" -UseBasicParsing -ErrorAction SilentlyContinue
+           if ($resp) {
+           $serviceReady = $true
+           Write-Host "Service is ready!"
+          } else {
+          Write-Host "Waiting for service..."
+          Start-Sleep -Seconds 10
+          }
+           }
 
       - name: Rollback on Failure
         if: ${{ failure() }}
