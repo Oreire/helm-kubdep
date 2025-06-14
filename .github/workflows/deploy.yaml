@@ -57,19 +57,49 @@ jobs:
           kubectl get all -n coweb-ns
           kubectl get svc -n coweb-ns
 
-      - name: Wait for service to be Ready and port-forward
+      # - name: Wait for service to be Ready and port-forward
+      #   run: |
+      #     kubectl wait --for=condition=available --timeout=150s deployment/coweb -n coweb-ns
+      #     kubectl port-forward svc/coweb-service -n coweb-ns 30010:80 &
+      #     echo "Service is now available at http://localhost:30010"
+
+      # - name: Port-forward coweb-service
+      #   shell: pwsh
+      #   run: |
+      #     Start-Process -FilePath "kubectl" `
+      #       -ArgumentList "port-forward svc/coweb-service -n coweb-ns 30010:80" `
+      #       -WindowStyle Hidden
+      #     Start-Sleep -Seconds 5  # Allow port-forward to spin up
+      - name: Wait for service to be Ready
         run: |
           kubectl wait --for=condition=available --timeout=150s deployment/coweb -n coweb-ns
-          kubectl port-forward svc/coweb-service -n coweb-ns 30010:80 &
-          echo "Service is now available at http://localhost:30010"
 
-      - name: Port-forward coweb-service
+      - name: Background port-forwarding
+        run: |
+         nohup kubectl port-forward svc/coweb-service -n coweb-ns 30011:80 > port-forward.log 2>&1 &
+         echo "✅ Service is now available at http://localhost:30011"
+
+      - name: Verify Port Forwarding
         shell: pwsh
         run: |
-          Start-Process -FilePath "kubectl" `
-            -ArgumentList "port-forward svc/coweb-service -n coweb-ns 30010:80" `
-            -WindowStyle Hidden
-          Start-Sleep -Seconds 5  # Allow port-forward to spin up
+         $maxAttempts = 20
+         $attempt = 0
+         while ($attempt -lt $maxAttempts) {
+         try {
+         $resp = Invoke-WebRequest -Uri "http://localhost:30011" -UseBasicParsing -ErrorAction Stop
+         if ($resp.StatusCode -eq 200) {
+          Write-Host "✅ Service is ready!"
+          break
+          }
+         } catch {
+         Write-Host "Waiting for service... attempt $($attempt + 1)"
+         Start-Sleep -Seconds 5
+         $attempt++
+         }
+         }
+         if ($attempt -eq $maxAttempts) {
+         throw "❌ Service did not become ready in time."
+         }
 
       - name: Rollback on Failure
         if: ${{ failure() }}
