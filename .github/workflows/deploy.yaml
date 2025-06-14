@@ -64,11 +64,15 @@ jobs:
          set -e
          kubectl rollout undo deployment/coweb -n coweb-ns
 
-      - name: Install ArgoCD CLI (Windows)
-        shell: pwsh
+      # - name: Install ArgoCD CLI (Windows)
+      #   shell: pwsh
+      #   run: |
+      #     Invoke-WebRequest -Uri "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe" -OutFile "$env:USERPROFILE\argocd.exe"
+      #     $env:Path += ";$env:USERPROFILE"
+
+      - name: Install ArgoCD in the local k8s cluster
         run: |
-          Invoke-WebRequest -Uri "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe" -OutFile "$env:USERPROFILE\argocd.exe"
-          $env:Path += ";$env:USERPROFILE"
+          kubectl apply -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
 
       - name: Port Forward ArgoCD Server (Windows-safe)
         shell: pwsh
