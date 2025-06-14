@@ -12,18 +12,14 @@ image:
 service:
   name: coweb-service
   type: ClusterIP
-  # Uncomment the following line to create a headless service
-  # If you want a headless service, set clusterIP to None.
-  # type: ClusterIP  # Change to NodePort or LoadBalancer if needed
-  # Uncomment the following line to create a headless service
-  # clusterIP: None  # Optional—include only if you're creating a headless service
-
-  clusterIP: ""  # Leave empty for automatic assignment
+  clusterIP: ""  # empty for automatic assignment (omit entirely for default behavior)
   ports:
     - name: http
       port: 80
       targetPort: 80
       protocol: TCP
+containerPort: 80  # Ensures containerPort is set correctly in Deployment
+
 
 # Ingress Configuration (Disabled by Default)
 ingress:

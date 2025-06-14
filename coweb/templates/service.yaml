@@ -5,15 +5,17 @@ metadata:
   labels:
     app: {{ .Release.Name }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.service.type | default "ClusterIP" }}
   {{- if and .Values.service.clusterIP (eq .Values.service.type "ClusterIP") }}
   clusterIP: {{ .Values.service.clusterIP }}
   {{- end }}
   selector:
     app: {{ .Release.Name }}
   ports:
-    - name: http
-      port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-      protocol: TCP
+    {{- range .Values.service.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+    {{- end }}
 
