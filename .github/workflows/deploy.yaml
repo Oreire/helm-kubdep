@@ -57,12 +57,27 @@ jobs:
           kubectl get all -n coweb-ns
           kubectl get svc -n coweb-ns
 
+      - name: Wait for service to be Ready and port-forward
+        run: |
+          kubectl wait --for=condition=available --timeout=300s deployment/coweb -n coweb-ns
+          kubectl port-forward svc/coweb-service 32000:80 -n coweb-ns &
+          echo "Service is now available at http://localhost:32000"
+
+      - name: Verify Service
+        shell: bash
+        run: |
+          sleep 10
+          if ! curl -s http://localhost:32000; then
+            echo "Service is not reachable!"
+            exit 1
+          else
+            echo "Service is reachable!"
+          fi
+
       - name: Rollback on Failure
         if: ${{ failure() }}
         run: |
           kubectl rollout undo deployment/coweb -n coweb-ns
-
-      # Removed: ArgoCD CLI installation, assuming it's pre-installed
 
       - name: Install ArgoCD in the local k8s cluster
         run: |
@@ -85,43 +100,4 @@ jobs:
             exit 1
           }
 
-      # - name: Login to ArgoCD
-      #   shell: pwsh
-      #   run: |
-      #     & "$env:USERPROFILE\argocd.exe" login localhost:8080 --username admin --password $env:ARGOCD_PASSWORD --grpc-web --insecure
-      #   env:
-      #     ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
-
-      # - name: Deploy with ArgoCD (Bash)
-      #   shell: bash
-      #   run: |
-      #     set -e
-      #     argocd app sync coweb-app --grpc-web
-      #     argocd app wait coweb-app --health --timeout 300
-
-      # - name: Wait for Service and Port Forward
-      #   shell: bash
-      #   run: |
-      #     until kubectl get svc coweb-service -n coweb-ns; do
-      #       echo "Waiting for service..."
-      #       sleep 5
-      #     done
-      #     kubectl port-forward svc/coweb-service 32000:80 -n coweb-ns &
-      - name: Wait for Service (PowerShell)
-        shell: pwsh
-        run: |
-          while (-not (kubectl get svc coweb-service -n coweb-ns -ErrorAction SilentlyContinue)) {
-              Start-Sleep -Seconds 5
-          }
-          Write-Host "Service is available!"
-
-      - name: Verify Service
-        shell: bash
-        run: |
-          sleep 10
-          if ! curl -s http://localhost:32000; then
-            echo "Service is not reachable!"
-            exit 1
-          else
-            echo "Service is reachable!"
-          fi
+      
