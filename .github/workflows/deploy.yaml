@@ -57,61 +57,37 @@ jobs:
           kubectl get all -n coweb-ns
           kubectl get svc -n coweb-ns
 
-      - name: Port-forward and Verify Service
-        shell: pwsh
+      
+      - name: Wait for service to be Ready
         run: |
           kubectl wait --for=condition=available --timeout=150s deployment/coweb -n coweb-ns
 
-          # Start port-forward in background
-          kubectl port-forward svc/coweb-service -n coweb-ns 30013:80 > pf.log 2>&1 &
-          PF_PID=$!
+      - name: Background port-forwarding
+        run: |
+         nohup kubectl port-forward svc/coweb-service -n coweb-ns 30014:80 > port-forward.log 2>&1 &
+         echo "✅ Service is now available at http://localhost:30014"
 
-          # Wait for service to be reachable
-          echo "⏳ Waiting for service on http://localhost:30013..."
-          for i in {1..20}; do
-           if curl -s http://localhost:30013 > /dev/null; then
-          echo "✅ Service is up!"
+      - name: Verify Port Forwarding
+        shell: pwsh
+        run: |
+         $maxAttempts = 20
+         $attempt = 0
+         while ($attempt -lt $maxAttempts) {
+         try {
+         $resp = Invoke-WebRequest -Uri "http://localhost:30014" -UseBasicParsing -ErrorAction Stop
+         if ($resp.StatusCode -eq 200) {
+          Write-Host "✅ Service is ready!"
           break
-           else
-          echo "Waiting... attempt $i"
-          sleep 5
-          fi
-          done
-
-          # Optionally kill port-forward when done
-          kill $PF_PID
-
-
-      # - name: Wait for service to be Ready
-      #   run: |
-      #     kubectl wait --for=condition=available --timeout=150s deployment/coweb -n coweb-ns
-
-      # - name: Background port-forwarding
-      #   run: |
-      #    nohup kubectl port-forward svc/coweb-service -n coweb-ns 30012:80 > port-forward.log 2>&1 &
-      #    echo "✅ Service is now available at http://localhost:30012"
-
-      # - name: Verify Port Forwarding
-      #   shell: pwsh
-      #   run: |
-      #    $maxAttempts = 20
-      #    $attempt = 0
-      #    while ($attempt -lt $maxAttempts) {
-      #    try {
-      #    $resp = Invoke-WebRequest -Uri "http://localhost:30012" -UseBasicParsing -ErrorAction Stop
-      #    if ($resp.StatusCode -eq 200) {
-      #     Write-Host "✅ Service is ready!"
-      #     break
-      #     }
-      #    } catch {
-      #    Write-Host "Waiting for service... attempt $($attempt + 1)"
-      #    Start-Sleep -Seconds 5
-      #    $attempt++
-      #    }
-      #    }
-      #    if ($attempt -eq $maxAttempts) {
-      #    throw "❌ Service did not become ready in time."
-      #    }
+          }
+         } catch {
+         Write-Host "Waiting for service... attempt $($attempt + 1)"
+         Start-Sleep -Seconds 5
+         $attempt++
+         }
+         }
+         if ($attempt -eq $maxAttempts) {
+         throw "❌ Service did not become ready in time."
+         }
 
       - name: Rollback on Failure
         if: ${{ failure() }}
