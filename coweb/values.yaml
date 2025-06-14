@@ -11,11 +11,13 @@ image:
 service:
   name: coweb-service  # Correctly sets the service name
   namespace: coweb-ns
-  type: NodePort
-  port: 80
-  targetPort: 80
-  protocol: TCP
-  nodePort: 32500  # NodePort must be within 30000-32767 range
+  type: clusterIP  # Change to NodePort if needed
+  clusterIP: ""  # Leave empty for automatic assignment
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
 
 # Ingress Configuration (Disabled by Default)
 ingress:
