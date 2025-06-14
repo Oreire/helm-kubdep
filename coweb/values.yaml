@@ -8,10 +8,16 @@ image:
   tag: "latest"
 
 # Service Configuration
+
 service:
-  name: coweb-service  # Correctly sets the service name
-  namespace: coweb-ns
-  type: clusterIP  # Change to NodePort if needed
+  name: coweb-service
+  type: ClusterIP
+  # Uncomment the following line to create a headless service
+  # If you want a headless service, set clusterIP to None.
+  # type: ClusterIP  # Change to NodePort or LoadBalancer if needed
+  # Uncomment the following line to create a headless service
+  # clusterIP: None  # Optional—include only if you're creating a headless service
+
   clusterIP: ""  # Leave empty for automatic assignment
   ports:
     - name: http
