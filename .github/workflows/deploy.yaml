@@ -60,14 +60,14 @@ jobs:
       - name: Wait for service to be Ready and port-forward
         run: |
           kubectl wait --for=condition=available --timeout=150s deployment/coweb -n coweb-ns
-          kubectl port-forward svc/coweb-service -n coweb-ns 32500:80 &
-          echo "Service is now available at http://localhost:32500"
+          kubectl port-forward svc/coweb-service -n coweb-ns 30010:80 &
+          echo "Service is now available at http://localhost:30010"
 
       - name: Port-forward coweb-service
         shell: pwsh
         run: |
           Start-Process -FilePath "kubectl" `
-            -ArgumentList "port-forward svc/coweb-service -n coweb-ns 32500:80" `
+            -ArgumentList "port-forward svc/coweb-service -n coweb-ns 30010:80" `
             -WindowStyle Hidden
           Start-Sleep -Seconds 5  # Allow port-forward to spin up
 
