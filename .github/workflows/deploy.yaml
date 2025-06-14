@@ -99,14 +99,21 @@ jobs:
       #     argocd app sync coweb-app --grpc-web
       #     argocd app wait coweb-app --health --timeout 300
 
-      - name: Wait for Service and Port Forward
-        shell: bash
+      # - name: Wait for Service and Port Forward
+      #   shell: bash
+      #   run: |
+      #     until kubectl get svc coweb-service -n coweb-ns; do
+      #       echo "Waiting for service..."
+      #       sleep 5
+      #     done
+      #     kubectl port-forward svc/coweb-service 32000:80 -n coweb-ns &
+      - name: Wait for Service (PowerShell)
+        shell: pwsh
         run: |
-          until kubectl get svc coweb-service -n coweb-ns; do
-            echo "Waiting for service..."
-            sleep 5
-          done
-          kubectl port-forward svc/coweb-service 32000:80 -n coweb-ns &
+          while (-not (kubectl get svc coweb-service -n coweb-ns -ErrorAction SilentlyContinue)) {
+              Start-Sleep -Seconds 5
+          }
+          Write-Host "Service is available!"
 
       - name: Verify Service
         shell: bash
