@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "coweb.fullname" . }}
   labels:
+    app: coweb
     {{- include "coweb.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
@@ -10,10 +11,12 @@ spec:
   {{- end }}
   selector:
     matchLabels:
+      app: coweb
       {{- include "coweb.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
+        app: coweb
         {{- include "coweb.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
