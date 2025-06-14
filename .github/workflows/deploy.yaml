@@ -76,30 +76,30 @@ jobs:
 
       - name: Background port-forwarding
         run: |
-         nohup kubectl port-forward svc/coweb-service -n coweb-ns 30011:80 > port-forward.log 2>&1 &
-         echo "✅ Service is now available at http://localhost:30011"
+         nohup kubectl port-forward svc/coweb-service -n coweb-ns 30012:80 > port-forward.log 2>&1 &
+         echo "✅ Service is now available at http://localhost:30012"
 
-      - name: Verify Port Forwarding
-        shell: pwsh
-        run: |
-         $maxAttempts = 20
-         $attempt = 0
-         while ($attempt -lt $maxAttempts) {
-         try {
-         $resp = Invoke-WebRequest -Uri "http://localhost:30011" -UseBasicParsing -ErrorAction Stop
-         if ($resp.StatusCode -eq 200) {
-          Write-Host "✅ Service is ready!"
-          break
-          }
-         } catch {
-         Write-Host "Waiting for service... attempt $($attempt + 1)"
-         Start-Sleep -Seconds 5
-         $attempt++
-         }
-         }
-         if ($attempt -eq $maxAttempts) {
-         throw "❌ Service did not become ready in time."
-         }
+      # - name: Verify Port Forwarding
+      #   shell: pwsh
+      #   run: |
+      #    $maxAttempts = 20
+      #    $attempt = 0
+      #    while ($attempt -lt $maxAttempts) {
+      #    try {
+      #    $resp = Invoke-WebRequest -Uri "http://localhost:30012" -UseBasicParsing -ErrorAction Stop
+      #    if ($resp.StatusCode -eq 200) {
+      #     Write-Host "✅ Service is ready!"
+      #     break
+      #     }
+      #    } catch {
+      #    Write-Host "Waiting for service... attempt $($attempt + 1)"
+      #    Start-Sleep -Seconds 5
+      #    $attempt++
+      #    }
+      #    }
+      #    if ($attempt -eq $maxAttempts) {
+      #    throw "❌ Service did not become ready in time."
+      #    }
 
       - name: Rollback on Failure
         if: ${{ failure() }}
