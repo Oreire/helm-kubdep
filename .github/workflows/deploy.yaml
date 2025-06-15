@@ -18,6 +18,26 @@ jobs:
           if (-not $registryExists) {
             docker run -d -p 5000:5000 --restart=always --name registry registry:2
           }
+      - name: Wait for ArgoCD to be Available
+        run: |
+          kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
+
+      - name: Port Forward ArgoCD Server (Windows-safe)
+        shell: pwsh
+        run: |
+          Start-Process -NoNewWindow -FilePath "kubectl" -ArgumentList "port-forward svc/argocd-server -n argocd 8080:443"
+
+      - name: Validate ArgoCD CLI Execution
+        shell: pwsh
+        run: |
+          if (!(Test-Path "$env:USERPROFILE\argocd.exe")) {
+            Write-Error "ArgoCD CLI not found!"
+            exit 1
+          }
+
+      - name: Force ArgoCD Sync
+        run: |
+          argocd app sync coweb
 
       - name: Build and Push Local Docker Image
         run: |
@@ -67,51 +87,15 @@ jobs:
          nohup kubectl port-forward svc/coweb-service -n coweb-ns 30015:80 > port-forward.log 2>&1 &
          echo "✅ Service is now available at http://localhost:30015"
 
-      # - name: Verify Port Forwarding
-      #   shell: pwsh
-      #   run: |
-      #    $maxAttempts = 20
-      #    $attempt = 0
-      #    while ($attempt -lt $maxAttempts) {
-      #    try {
-      #    $resp = Invoke-WebRequest -Uri "http://localhost:30014" -UseBasicParsing -ErrorAction Stop
-      #    if ($resp.StatusCode -eq 200) {
-      #     Write-Host "✅ Service is ready!"
-      #     break
-      #     }
-      #    } catch {
-      #    Write-Host "Waiting for service... attempt $($attempt + 1)"
-      #    Start-Sleep -Seconds 5
-      #    $attempt++
-      #    }
-      #    }
-      #    if ($attempt -eq $maxAttempts) {
-      #    throw "❌ Service did not become ready in time."
-      #    }
       - name: Rollback on Failure
         if: ${{ failure() }}
         run: |
           kubectl rollout undo deployment/coweb -n coweb-ns
 
-      - name: Install ArgoCD in the local k8s cluster
-        run: |
-          kubectl apply -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
+      # - name: Install ArgoCD in the local k8s cluster
+      #   run: |
+      #     kubectl apply -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
 
-      - name: Wait for ArgoCD to be Available
-        run: |
-          kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
-
-      - name: Port Forward ArgoCD Server (Windows-safe)
-        shell: pwsh
-        run: |
-          Start-Process -NoNewWindow -FilePath "kubectl" -ArgumentList "port-forward svc/argocd-server -n argocd 8080:443"
-
-      - name: Validate ArgoCD CLI Execution
-        shell: pwsh
-        run: |
-          if (!(Test-Path "$env:USERPROFILE\argocd.exe")) {
-            Write-Error "ArgoCD CLI not found!"
-            exit 1
-          }
-
-      
+      # - name: Wait for ArgoCD Application to be Ready
+      #   run: |
+      #     argocd app wait coweb --timeout 300
