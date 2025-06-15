@@ -64,30 +64,62 @@ jobs:
 
       - name: Background port-forwarding
         run: |
-         nohup kubectl port-forward svc/coweb-service -n coweb-ns 30014:80 > port-forward.log 2>&1 &
-         echo "✅ Service is now available at http://localhost:30014"
+         nohup kubectl port-forward svc/coweb-service -n coweb-ns 30015:80 > port-forward.log 2>&1 &
+         echo "✅ Service is now available at http://localhost:30015"
 
-      - name: Verify Port Forwarding
+      # - name: Verify Port Forwarding
+      #   shell: pwsh
+      #   run: |
+      #    $maxAttempts = 20
+      #    $attempt = 0
+      #    while ($attempt -lt $maxAttempts) {
+      #    try {
+      #    $resp = Invoke-WebRequest -Uri "http://localhost:30014" -UseBasicParsing -ErrorAction Stop
+      #    if ($resp.StatusCode -eq 200) {
+      #     Write-Host "✅ Service is ready!"
+      #     break
+      #     }
+      #    } catch {
+      #    Write-Host "Waiting for service... attempt $($attempt + 1)"
+      #    Start-Sleep -Seconds 5
+      #    $attempt++
+      #    }
+      #    }
+      #    if ($attempt -eq $maxAttempts) {
+      #    throw "❌ Service did not become ready in time."
+      #    }
+      - name: Port-forward and probe service (PowerShell)
         shell: pwsh
         run: |
-         $maxAttempts = 20
-         $attempt = 0
-         while ($attempt -lt $maxAttempts) {
-         try {
-         $resp = Invoke-WebRequest -Uri "http://localhost:30014" -UseBasicParsing -ErrorAction Stop
-         if ($resp.StatusCode -eq 200) {
-          Write-Host "✅ Service is ready!"
-          break
-          }
-         } catch {
-         Write-Host "Waiting for service... attempt $($attempt + 1)"
+         $pf = Start-Process -PassThru -NoNewWindow -WindowStyle Hidden -FilePath "kubectl" `
+         -ArgumentList "port-forward svc/coweb-service -n coweb-ns 30015:80"
+
          Start-Sleep -Seconds 5
-         $attempt++
+
+         $max = 20
+         $success = $false
+         for ($i = 1; $i -le $max; $i++) {
+         try {
+          $r = Invoke-WebRequest -Uri "http://localhost:30015" -UseBasicParsing -TimeoutSec 5
+         if ($r.StatusCode -eq 200) {
+          Write-Host "✅ Service is up!"
+          $success = $true
+          break
+         }
+         } catch {
+         Write-Host "Attempt $i failed"
+         Start-Sleep -Seconds 5
          }
          }
-         if ($attempt -eq $maxAttempts) {
+
+         if (-not $success) {
+         Stop-Process -Id $pf.Id -Force
          throw "❌ Service did not become ready in time."
          }
+
+         Stop-Process -Id $pf.Id -Force
+
+
 
       - name: Rollback on Failure
         if: ${{ failure() }}
