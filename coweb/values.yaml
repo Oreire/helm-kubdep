@@ -66,7 +66,7 @@ serviceAccount:
 # ArgoCD Application Configuration
 name: coweb  # Standardized to prevent duplicate deployments
 namespace: argocd
-project: default
+project: coweb-ns # default
 
 # Git Source Configuration
 repoURL: https://github.com/Oreire/helm-kubdep.git
@@ -83,7 +83,7 @@ syncPolicy:
 
 # Destination Cluster Details (Namespace and Server Alignment)
 destinationServer: https://kubernetes.default.svc
-destinationNamespace: default # coweb-ns
+destinationNamespace: coweb-ns
 
 # Helm-Specific Naming (To Prevent Duplicate Releases)
 fullnameOverride: coweb
