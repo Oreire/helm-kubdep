@@ -88,39 +88,6 @@ jobs:
       #    if ($attempt -eq $maxAttempts) {
       #    throw "❌ Service did not become ready in time."
       #    }
-      - name: Port-forward and probe service (PowerShell)
-        shell: pwsh
-        run: |
-         $pf = Start-Process -PassThru -WindowStyle Hidden -FilePath "kubectl" `
-         -ArgumentList "port-forward svc/coweb-service -n coweb-ns 30015:80"
-          Write-Host "✅ Port forwarding started. Service is available at http://localhost:30015"
-         Start-Sleep -Seconds 5
-
-         $max = 20
-         $success = $false
-         for ($i = 1; $i -le $max; $i++) {
-         try {
-          $r = Invoke-WebRequest -Uri "http://localhost:30015" -UseBasicParsing -TimeoutSec 5
-         if ($r.StatusCode -eq 200) {
-          Write-Host "✅ Service is up!"
-          $success = $true
-          break
-         }
-         } catch {
-         Write-Host "Attempt $i failed"
-         Start-Sleep -Seconds 5
-         }
-         }
-
-         if (-not $success) {
-         Stop-Process -Id $pf.Id -Force
-         throw "❌ Service did not become ready in time."
-         }
-
-         Stop-Process -Id $pf.Id -Force
-
-
-
       - name: Rollback on Failure
         if: ${{ failure() }}
         run: |
