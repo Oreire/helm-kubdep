@@ -15,6 +15,8 @@ spec:
         - {{ . }}
         {{- end }}
       parameters:
+        - name: image.repository
+          value: "{{ .Values.image.repository }}"
         - name: image.tag
           value: "{{ .Values.image.tag }}"
         - name: image.pullPolicy
