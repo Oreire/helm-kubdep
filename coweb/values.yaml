@@ -83,7 +83,7 @@ syncPolicy:
 
 # Destination Cluster Details (Namespace and Server Alignment)
 destinationServer: https://kubernetes.default.svc
-destinationNamespace: coweb-ns
+destinationNamespace: default # coweb-ns
 
 # Helm-Specific Naming (To Prevent Duplicate Releases)
 fullnameOverride: coweb
