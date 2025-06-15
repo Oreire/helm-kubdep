@@ -75,38 +75,29 @@ serviceAccount:
 
   
 # ArgoCD Application Configuration
+# Application Metadata
+name: coweb-app
+namespace: argocd
+project: default
 
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: coweb-app
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: https://github.com/Oreire/helm-kubdep.git
-    targetRevision: main
-    path: coweb/
-    helm:
-      valueFiles:
-        - values.yaml
-      parameters:
-        - name: image.repository
-          value: localhost:5000/coweb-app
-        - name: image.tag
-          value: latest
-        - name: image.pullPolicy
-          value: Always
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: coweb-ns
-  syncPolicy:
-    prune: true
-    selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ApplyOutOfSyncOnly=true
-      - Replace=true
+# Git Source Configuration
+repoURL: https://github.com/Oreire/helm-kubdep.git
+targetRevision: main
+path: coweb/
+valueFiles:
+  - values.yaml
+
+
+# ArgoCD Sync Policy
+syncPolicy:
+  prune: true
+  selfHeal: true
+
+# Destination Cluster Details
+destinationServer: https://kubernetes.default.svc
+destinationNamespace: coweb-ns
+
+
 
 
 
