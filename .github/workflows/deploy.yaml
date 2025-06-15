@@ -77,7 +77,6 @@ jobs:
           kubectl get all -n coweb-ns
           kubectl get svc -n coweb-ns
 
-      
       - name: Wait for service to be Ready
         run: |
           kubectl wait --for=condition=available --timeout=150s deployment/coweb -n coweb-ns

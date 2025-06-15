@@ -1,12 +1,17 @@
-## Deployment of Containerized Web Applications on a Kubernetes Cluster Using Helm and GitHub Actions
+## End-to-End CI/CD Pipeline with Helm, ArgoCD, and GitHub Actions
+   A GitOps-Driven Approach to Cloud-Native Application Delivery
 
 
 ## 1.0	Project Overview
 
-This project implements the automated deployment of a containerized web application on a Kubernetes cluster using Helm charts. A three-node Kubernetes cluster was created using KIND (Kubernetes IN Docker) on Docker Desktop to simulate a production-like environment.
-The deployment process involved building and containerizing the application using a Dockerfile, followed by pushing the image to a local container registry for efficient image management. Helm charts were then configured to define the application's Kubernetes resources, ensuring a standardized and repeatable deployment process.
-To achieve continuous integration and deployment (CI/CD), GitHub Actions (self-hosted runner) was utilized to automate the Helm-based deployment pipeline. This ensured that any updates to the application were seamlessly built, tested, and deployed to the Kubernetes cluster. Finally, port-forwarding was used to enable access to the deployed application, allowing interaction with the running service within the cluster.
-This project demonstrates a scalable, automated, and efficient approach to deploying containerized applications in a Kubernetes environment, leveraging Helm for package management and GitHub Actions for CI/CD automation.
+This project implements the automated deployment of a containerized web application on a Kubernetes cluster using Helm charts and GitOps principles. A four-node Kubernetes cluster was created using KIND (Kubernetes IN Docker) on Docker Desktop to simulate a production-like environment.
+
+The deployment process involved building and containerizing the application using a Dockerfile, then pushing the image to a local container registry for efficient image storage and access. Helm charts were configured to define the application's Kubernetes resources, ensuring a standardized, reproducible, and version-controlled deployment.
+
+To achieve continuous integration and deployment (CI/CD), GitHub Actions (with a self-hosted runner) was used to automate the Helm-based deployment pipeline—triggering builds and releases on code changes. ArgoCD was then integrated to manage application deployments declaratively using GitOps. It continuously monitored the Helm chart repository and synchronized the cluster state with the desired configuration stored in Git, enabling automated rollbacks, drift detection, and visual insight into the deployment lifecycle. Finally, port-forwarding was used to enable local access to the deployed application, providing interactive access to the running service within the cluster.
+
+This project demonstrates a scalable, automated, and GitOps-driven approach to deploying containerized applications in Kubernetes—leveraging Helm for Kubernetes packaging, GitHub Actions for CI/CD orchestration, and ArgoCD for declarative and auditable GitOps delivery.
+
 
 ## 2.0	Technologies Used
 
@@ -147,5 +152,3 @@ To optimize this CI/CD workflow for production environments, consider the follow
 
 
 
-xxx
-yyy
