@@ -91,9 +91,9 @@ jobs:
       - name: Port-forward and probe service (PowerShell)
         shell: pwsh
         run: |
-         $pf = Start-Process -PassThru -NoNewWindow -WindowStyle Hidden -FilePath "kubectl" `
+         $pf = Start-Process -PassThru -WindowStyle Hidden -FilePath "kubectl" `
          -ArgumentList "port-forward svc/coweb-service -n coweb-ns 30015:80"
-
+          Write-Host "✅ Port forwarding started. Service is available at http://localhost:30015"
          Start-Sleep -Seconds 5
 
          $max = 20
