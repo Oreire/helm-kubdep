@@ -64,7 +64,7 @@ serviceAccount:
 
   
 # ArgoCD Application Configuration
-name: coweb
+name: coweb  # Standardized to prevent duplicate deployments
 namespace: argocd
 project: default
 
@@ -74,14 +74,23 @@ targetRevision: main
 path: coweb/
 valueFiles:
   - values.yaml
-# ArgoCD Sync Policy
-syncPolicy:
-  prune: true
-  selfHeal: true
 
-# Destination Cluster Details
+# ArgoCD Sync Policy (Explicit Automated Sync)
+syncPolicy:
+  automated:
+    prune: true
+    selfHeal: true
+
+# Destination Cluster Details (Namespace and Server Alignment)
 destinationServer: https://kubernetes.default.svc
 destinationNamespace: coweb-ns
+
+# Helm-Specific Naming (To Prevent Duplicate Releases)
+fullnameOverride: coweb
+
+
+
+
 
 
 
