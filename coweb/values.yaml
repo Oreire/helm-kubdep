@@ -75,13 +75,14 @@ serviceAccount:
 
   
 # ArgoCD Application Configuration
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: coweb-app
   namespace: argocd
 spec:
-  project: default  # ← changed from "coweb-ns" to match your only existing project
+  project: default
   source:
     repoURL: https://github.com/Oreire/helm-kubdep.git
     targetRevision: main
@@ -100,12 +101,13 @@ spec:
     server: https://kubernetes.default.svc
     namespace: coweb-ns
   syncPolicy:
-  prune: true
-  selfHeal: true
-
-  syncOptions:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
       - Replace=true
+
 
 

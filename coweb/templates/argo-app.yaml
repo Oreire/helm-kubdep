@@ -15,12 +15,18 @@ spec:
         - {{ . }}
         {{- end }}
       parameters:
+        {{- with .Values.image.repository }}
         - name: image.repository
-          value: "{{ .Values.image.repository }}"
+          value: "{{ . }}"
+        {{- end }}
+        {{- with .Values.image.tag }}
         - name: image.tag
-          value: "{{ .Values.image.tag }}"
+          value: "{{ . }}"
+        {{- end }}
+        {{- with .Values.image.pullPolicy }}
         - name: image.pullPolicy
-          value: "{{ .Values.image.pullPolicy }}"
+          value: "{{ . }}"
+        {{- end }}
   destination:
     server: {{ .Values.destinationServer | default "https://kubernetes.default.svc" }}
     namespace: {{ .Values.destinationNamespace | default "coweb-ns" }}
