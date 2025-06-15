@@ -66,7 +66,7 @@ serviceAccount:
 # ArgoCD Application Configuration
 name: coweb  # Standardized to prevent duplicate deployments
 namespace: argocd
-project: coweb-ns # default
+project: default
 
 # Git Source Configuration
 repoURL: https://github.com/Oreire/helm-kubdep.git
