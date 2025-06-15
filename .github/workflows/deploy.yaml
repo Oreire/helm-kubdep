@@ -35,9 +35,9 @@ jobs:
             exit 1
           }
 
-      - name: Force ArgoCD Sync
-        run: |
-          argocd app sync coweb
+      # - name: Force ArgoCD Sync
+      #   run: |
+      #     argocd app sync coweb
 
       - name: Build and Push Local Docker Image
         run: |
