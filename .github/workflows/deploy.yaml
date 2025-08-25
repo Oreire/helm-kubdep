@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   deploy:
@@ -90,11 +92,22 @@ jobs:
         if: ${{ failure() }}
         run: |
           kubectl rollout undo deployment/coweb -n coweb-ns
+  sonarqube:
+    name: SonarQube
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       # - name: Install ArgoCD in the local k8s cluster
       #   run: |
       #     kubectl apply -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
-
+     
       # - name: Wait for ArgoCD Application to be Ready
       #   run: |
       #     argocd app wait coweb --timeout 300
