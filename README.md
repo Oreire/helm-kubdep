@@ -1,6 +1,18 @@
 ## End-to-End CI/CD Pipeline with Helm, ArgoCD, and GitHub Actions
    A GitOps-Driven Approach to Cloud-Native Application Delivery
 
+Overview:
+Implemented a GitOps‑driven CI/CD pipeline for automated deployment of containerized web applications on Kubernetes. A four‑node KIND cluster on Docker Desktop simulated production‑like environments, enabling reproducible and version‑controlled deployments. Helm charts defined Kubernetes resources, ensuring standardization and repeatability. GitHub Actions (with a self‑hosted runner) automated build and release pipelines, while ArgoCD continuously synchronized cluster state with Git repositories, enabling declarative deployments, drift detection, and automated rollbacks. This project demonstrates proficiency in cloud‑native tooling, GitOps governance, and CI/CD automation for scalable and auditable application delivery.
+
+Tools & Technologies
+
+• Kubernetes (KIND, Docker Desktop)
+• Helm (Kubernetes packaging, resource definition)
+• ArgoCD (GitOps deployment, drift detection, rollbacks)
+• GitHub Actions (CI/CD automation, self‑hosted runner)
+• Docker (containerization, local registry)
+
+
 
 ## 1.0	Project Overview
 
